@@ -18,6 +18,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <string.h>
+#include <getopt.h>
 
 
 #define REQUEST_MSG_SIZE	1024*256
@@ -26,20 +27,50 @@
 
 
 /************************
-*
-*
-* tcpClient
-*
-*
+* TCPClient
 */
+
 int main(int argc, char *argv[]){
+	
+	char ip[64];
+	char url[64];
+	int opt = 0;
+	int check = 0;
+
+	static struct option long_options[] = {
+		{"url", required_argument, 0, 'u'},
+		{"ip", required_argument, 0, 'i'},
+		{0, 0}
+    };
+
+	int long_index = 0;
+	while ((opt = getopt_long(argc, argv, "u:i:", long_options, &long_index)) != -1) {
+		switch (opt) {
+		case 'u':
+		sprintf (url, optarg);
+			break;
+		case 'i':
+		sprintf (ip, optarg);
+			break;
+		default:
+		printf("Getopt error1");;
+			}}
+
+    if (check == 0) {
+		printf("Getopt error2");
+		exit(EXIT_FAILURE);
+    }
+
+    else {
+		
 	struct sockaddr_in	serverAddr;
 	char	    serverName[] = "192.168.11.249"; //Adreça IP on està el client
 	int			sockAddrSize;
 	int			sFd;
 	int 		result;
 	char		buffer[REQUEST_MSG_SIZE];
-	char		missatge[] = "GET %s HTTP/1.0\r\n\r\n";
+	char 		missatge[1024];
+	//char buffer[1024];
 
 	/*Crear el socket*/
 	sFd=socket(AF_INET,SOCK_STREAM,0);
@@ -60,11 +91,31 @@ int main(int argc, char *argv[]){
 	}
 	printf("\nConnexió establerta amb el servidor: adreça %s, port %d\n",	inet_ntoa(serverAddr.sin_addr), ntohs(serverAddr.sin_port));
 
+	/*Rebre*/
+	result = read(sFd, buffer, REQUEST_MSG_SIZE);
+	printf("Missatge rebut del servidor(bytes %d): \n{%s}\n", result, buffer);
+	sprintf(missatge, "Direccio IP del servidor web: %s\n", ip);
+	printf(missatge);
+	
 	/*Enviar*/
 	memset(buffer, 0, REQUEST_MSG_SIZE);
-	sprintf(buffer,missatge, "/parcial1.html"); //Copiar missatge a buffer
+	memset(missatge, 0, 1024);
+	sprintf(missatge, "HELO 1457962\n");
+	sprintf(buffer,missatge); //Copiar missatge a buffer
 	result = write(sFd, buffer, strlen(buffer));
 	printf("Missatge enviat a servidor(bytes %d): \n{%s}\n\n",	result, buffer);
+	
+	/*Rebre*/
+	result = read(sFd, buffer, REQUEST_MSG_SIZE);
+	printf("Missatge rebut del servidor(bytes %d): \n{%s}\n", result, buffer);
+	
+	/*Enviar*/
+	memset(buffer, 0, REQUEST_MSG_SIZE);
+	sprintf(missatge, "GET %s HTTP1.0\n", url);
+	sprintf(buffer,missatge); //Copiar missatge a buffer
+	result = write(sFd, buffer, strlen(buffer));
+	printf("Missatge enviat a servidor(bytes %d): \n{%s}\n\n",	result, buffer);
+
 
 	/*Rebre*/
 	memset(buffer, 0, REQUEST_MSG_SIZE);
@@ -76,3 +127,4 @@ int main(int argc, char *argv[]){
 
 	return 0;
 	}
+}

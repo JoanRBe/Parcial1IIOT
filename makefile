@@ -1,6 +1,6 @@
 CC=gcc
 
-all: client_smtp
+all: client
 
 help:
 	@echo "Objectius possibles:\n"
@@ -28,4 +28,4 @@ clean:
 
 make test:
 
-		./build/client_smtp --servidor "172.20.0.21" --usuari "1457962" --remitent 1457962@campus.euss.org --destinatari 1457962@campus.euss.org --assumpte "Mail de prova" --text /home/pi/Desktop/IIOT/src/client_smtp/textemail.txt
+		./build/client --url "parcial1.html" --ip "192.168.11.249"
